@@ -1,0 +1,48 @@
+# Máquina de Turing para el lenguaje a^n b^2n donde n >= 0.
+# La máquina marca 'a' con 'x' y empareja cada 'a' con exactamente dos 'b' marcándolos como 'y'.
+# Repite el proceso hasta que todos los 'a' están procesados, y verifica que no queden 'b' sin emparejar.
+
+input: 'aaaabbbbbbbb'
+blank: □
+start state: q0
+table:
+  # Estado q0: Busca una 'a' para marcarla como 'x' y procesar los 'b' correspondientes
+  q0:
+    # Si encuentra 'y', lo deja igual y avanza hacia la derecha (ya procesado)
+    y: {write: y, R: q0}
+    # Si encuentra 'a', la marca como 'x' y pasa al estado q2 para encontrar los 'b' correspondientes
+    a: {write: x, R: q2}
+    # Si encuentra el símbolo en blanco y ha procesado todos los 'a' y 'b', acepta
+    □: {write: □, R: accept}
+    
+  # Estado q2: Busca el primer 'b' correspondiente a la 'a' marcada
+  q2:
+    # Si encuentra otra 'a', la deja igual y sigue a la derecha (procesa un 'a' a la vez)
+    a: {write: a, R: q2}
+    # Si encuentra un 'y', lo deja igual y sigue avanzando
+    y: {write: y, R: q2}
+    # Si encuentra el primer 'b' no procesado, lo marca como 'y' y pasa a q3 para procesar el segundo 'b'
+    b: {write: y, R: q3}
+
+  # Estado q3: Busca el segundo 'b' correspondiente a la 'a' marcada
+  q3:
+    # Si encuentra un 'y', lo deja igual y sigue hacia la derecha
+    y: {write: y, R: q3}
+    # Si encuentra el segundo 'b' no procesado, lo marca como 'y' y va a q4 para regresar al inicio
+    b: {write: y, R: q4}
+
+  # Estado q4: Regresa hacia la izquierda para encontrar la siguiente 'a' sin procesar
+  q4:
+    # Si encuentra el símbolo en blanco, sigue retrocediendo para regresar al inicio
+    □: {write: □, L: q4}
+    # Si encuentra una 'a', la deja igual y sigue retrocediendo
+    a: {write: a, L: q4}
+    # Si encuentra un 'b', lo deja igual y sigue retrocediendo
+    b: {write: b, L: q4}
+    # Si encuentra un 'y', lo deja igual y sigue retrocediendo
+    y: {write: y, L: q4}
+    # Si encuentra una 'x' (una 'a' ya procesada), se mueve a la derecha y vuelve a q0 para repetir el ciclo
+    x: {write: x, R: q0}
+
+  accept:
+
