@@ -1,0 +1,57 @@
+# Lenguaje a^n b^n c^m donde n >= 0 y m >= n.
+# La máquina marca cada 'a' con una 'x', encuentra la primera 'b' y la marca con 'y',
+# y después encuentra el primer 'c' y lo marca con 'z'. Este proceso se repite para asegurarse
+# de que hay un número igual de 'a' y 'b', y al menos tantas 'c' como 'b'.
+
+input: 'aabbc'
+blank: □
+start state: q0
+table:
+  # Estado q0: Recorrido inicial sobre la cadena
+  q0:
+    # Si encuentra 'c', lo deja igual y se mueve a la derecha (es parte de la condición de m >= n)
+    c: {write: c, R: q0}
+    # Si encuentra 'z', lo deja igual y se mueve a la derecha (ha sido procesado previamente)
+    z: {write: z, R: q0}
+    # Si encuentra 'y', lo deja igual y se mueve a la derecha (ha sido procesado previamente)
+    y: {write: y, R: q0}
+    # Si encuentra 'a', lo marca con 'x' y se mueve a q2 para buscar un 'b' correspondiente
+    a: {write: x, R: q2}
+    # Si llega al símbolo en blanco, ha procesado la cadena correctamente y acepta
+    □: {write: □, R: accept}
+
+  # Estado q2: Busca la primera 'b' después de haber marcado una 'a'
+  q2:
+    # Si encuentra otra 'a', la deja igual y sigue avanzando hacia la derecha
+    a: {write: a, R: q2}
+    # Si encuentra un 'y' (un 'b' ya procesado), lo deja igual y sigue hacia la derecha
+    y: {write: y, R: q2}
+    # Si encuentra el primer 'b' no procesado, lo marca con 'y' y se mueve a q3 para buscar un 'c'
+    b: {write: y, R: q3}
+
+  # Estado q3: Busca la primera 'c' después de haber marcado una 'b'
+  q3:
+    # Si encuentra un 'z' (un 'c' ya procesado), lo deja igual y sigue hacia la derecha
+    z: {write: z, R: q3}
+    # Si encuentra otro 'b', lo deja igual y sigue avanzando (aún no ha llegado a un 'c')
+    b: {write: b, R: q3}
+    # Si encuentra el primer 'c' no procesado, lo marca con 'z' y se mueve a q4 para regresar al inicio
+    c: {write: z, L: q4}
+    
+    □: {write: □, R: accept}
+
+  # Estado q4: Vuelve hacia la izquierda para encontrar el siguiente 'a' no procesado
+  q4:
+    # Si encuentra un 'a', lo deja igual y sigue retrocediendo
+    a: {write: a, L: q4}
+    # Si encuentra un 'b', lo deja igual y sigue retrocediendo
+    b: {write: b, L: q4}
+    # Si encuentra un 'y' (un 'b' ya procesado), lo deja igual y sigue retrocediendo
+    y: {write: y, L: q4}
+    # Si encuentra un 'z' (un 'c' ya procesado), lo deja igual y sigue retrocediendo
+    z: {write: z, L: q4}
+    # Si encuentra una 'x' (una 'a' ya procesada), se mueve a la derecha y vuelve a q0 para repetir el ciclo
+    x: {write: x, R: q0}
+
+  # Estado de aceptación cuando la cadena cumple con las condiciones
+  accept:
